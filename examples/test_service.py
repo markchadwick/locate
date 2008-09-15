@@ -32,7 +32,8 @@ class MyService(Thread):
         self.running = False
         
     def _dummy_service_registered(self, *args, **kwds):
-        self.log.info("Dummy Service Added: %s - %s" % (str(args), str(kwds)))
+        self.log.debug("Dummy Service Added: %s - %s" % (str(args), str(kwds)))
+        self.dummy_services.append(args[0:2])
         
     def _dummy_service_unregistered(self, *args, **kwds):
         self.log.info("Dummy Service Removed: %s - %s" % (str(args), str(kwds)))
@@ -54,6 +55,7 @@ class DummyService(Thread):
             
     def stop(self):
         self.log.debug("Stopping")
+        locate.unregister(self)
         self.running = False
 
 def main(args=sys.argv):
@@ -67,7 +69,7 @@ def main(args=sys.argv):
     dummy_service.start()
     time.sleep(1)
     dummy_service.stop()
-    time.sleep(1)
+    time.sleep(3)
     my_service.stop()
 
 if __name__ == '__main__':

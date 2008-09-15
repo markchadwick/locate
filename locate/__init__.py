@@ -9,9 +9,9 @@ class PresenseFactory(object):
         return BonjourPresenseDaemon(instance, port, timeout=timeout)
 
     @classmethod
-    def get_register_daemon(self, instance_type):
+    def get_register_daemon(self, instance_type, callback):
         from locate.presence import BonjourMonitorDaemon
-        return BonjourMonitorDaemon(instance_type)
+        return BonjourMonitorDaemon(instance_type, callback)
 
 def register(reg_instance, port, timeout=1):
     presence = PresenseFactory.get_presense_daemon(reg_instance, port, timeout=timeout)
@@ -25,7 +25,8 @@ def unregister(reg_instance):
         del _LOCAL_REGISTERED_INSTACES[reg_instance]
 
 def listen_for_register(class_name, callback):
-    presence = PresenseFactory.get_register_daemon(class_name)
+    presence = PresenseFactory.get_register_daemon(class_name, callback)
+    presence.start()
     return presence
     
 def listen_for_unregister(class_name, callback):
