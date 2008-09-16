@@ -3,48 +3,63 @@ import select
 import logging
 from threading import Thread
 
-class BonjourPresenseDaemon(Thread):
-    def __init__(self, instance, port, callback=None, timeout=1, name='Locate'):
+class PresenceDaemon(Thread):
+    def __init__(self, timeout=1):
+        """
+        :Parameters:
+            timeout : int
+                number of seconds to wait to select a socket.
+        """
         Thread.__init__(self)
         
-        self.instance = instance
-        self.port = port
-        self.callback = callback
-        self.timeout = timeout
-        
-        self.name = name
-        self.reg_type = self.__class__.instance_to_ref(instance)
-        
-        self.running = True
+        self._socket_timeout = timeout
+        self._running = True
 
-    @classmethod
-    def instance_to_ref(self, instance):
-        if isinstance(instance, type):
-            presence_type = instance.__name__
-        else:
-            presence_type = instance.__class__.__name__
-        return "_%s._tcp" % (presence_type)
+        self._registered_services = []
+
+    def register_service(self, instance, port, version, params={}):
+        service_type = self._get_service_type(instance)
+        service_repr = self._get_service_repr(service_type, port)
+
+        self._register_service(service_type, instance, port, version, params)
+        self._registered_services.append(instance)
+        
+    def unregister_service(self, instance):
+        instances = [i for i in self._registered_services if i == instance]
+        
+        for instance in instances:
+            self._unregister_service(instance)
+            self._registered_services.remove(instance)
 
     def run(self):
-        sd_ref = pybonjour.DNSServiceRegister(
-                    name=self.name,
-                    regtype=self.reg_type,
-                    port=self.port,
-                    callBack=self._service_registered_callback)
-        try:
-            while self.running:
-                ready = select.select([sd_ref], [], [], self.timeout)
-                if sd_ref in ready[0]:
-                    pybonjour.DNSServiceProcessResult(sd_ref)
-        finally:
-            sd_ref.close()
-
-    def stop(self):
-        self.running = False
+        pass
         
-    def _service_registered_callback(self, *args, **kwds):
-        if self.callback is not None:
-            self.callback(*args, **kwds)
+    def stop(self):
+        """
+        Cleanly shuts down the Presence Daemon.
+        """
+        self._running = False
+        
+    def _get_service_type(self, instance):
+        if isinstance(instance, type):
+            service_type = instance.__name__
+        elif isinstance(instance, str):
+            service_type = instance
+        else:
+            service_type = instance.__class__.__name__
+
+        return service_type
+
+    def _get_service_repr(self, service_type, port):
+        return "%s:%s" % (service_type, port)
+
+    def _register_service(self, repr):
+        raise "Presence subclass must implement _register_service"
+        
+    def _unregister_service(self, repr):
+        raise "Presence subclass must implement _unregister_service"
+        
+
 
 class BonjourMonitorDaemon(Thread):
     def __init__(self, monitor_class, callback):

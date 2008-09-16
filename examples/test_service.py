@@ -19,8 +19,8 @@ class MyService(Thread):
 
         locate.register(self, port)
         
-        locate.listen_for_register(DummyService, self._dummy_service_registered)
-        locate.listen_for_unregister(DummyService, self._dummy_service_unregistered)
+#        locate.listen_for_register(DummyService, self._dummy_service_registered)
+#        locate.listen_for_unregister(DummyService, self._dummy_service_unregistered)
 
     def run(self):
         while self.running:
