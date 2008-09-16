@@ -23,10 +23,6 @@ class BonjourPresenceDaemon(PresenceDaemon):
             self._dead_socks.append(self._sock_refs[instance])
             del self._sock_refs[instance]
 
-        else:
-            print '- ' * 30
-            print "Unknown Instance!"
-
     def run(self):
         try:
             while self._running:
@@ -51,50 +47,4 @@ class BonjourPresenceDaemon(PresenceDaemon):
                     regtype  = reg_type,
                     port     = port,
                     callBack = callback)
-
-
-
-#    def __init__(self):
-        
-        
-#        self.instance = instance
-#        self.port = port
-#        self.callback = callback
-#        self.timeout = timeout
-        
-#        self.name = name
-#        self.reg_type = self.__class__.instance_to_ref(instance)
-        
-#        self.running = True
-
-#    @classmethod
-#    def instance_to_ref(self, instance):
-#        if isinstance(instance, type):
-#            presence_type = instance.__name__
-#        else:
-#            presence_type = instance.__class__.__name__
-#        return "_%s._tcp" % (presence_type)
-
-#    def run(self):
-#        sd_ref = pybonjour.DNSServiceRegister(
-#                    name=self.name,
-#                    regtype=self.reg_type,
-#                    port=self.port,
-#                    callBack=self._service_registered_callback)
-#        try:
-#            while self.running:
-#                ready = select.select([sd_ref], [], [], self.timeout)
-#                if sd_ref in ready[0]:
-#                    pybonjour.DNSServiceProcessResult(sd_ref)
-#        finally:
-#            sd_ref.close()
-
-#    def stop(self):
-#        self.running = False
-        
-#    def _service_registered_callback(self, *args, **kwds):
-#        if self.callback is not None:
-#            self.callback(*args, **kwds)
-
-    pass
     
